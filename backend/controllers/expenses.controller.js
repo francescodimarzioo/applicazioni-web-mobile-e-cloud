@@ -1,27 +1,34 @@
-import { expenses } from "../data/store.js";
-import Expense from "../models/Expense.js";
-import { v4 as uuid } from "uuid";
+import Expense from "../models/ExpenseModel.js";
 
-export function createExpense(req, res) {
-  const { description, amount, paidBy, participants } = req.body;
-
-  if (!description || !amount || !participants) {
-    return res.status(400).json({ error: "Dati mancanti" });
+// GET tutte le spese
+export async function getExpenses(req, res) {
+  try {
+    const expenses = await Expense.find({});
+    res.json(expenses);
+  } catch (error) {
+    res.status(500).json({ error: "Errore nel recupero spese" });
   }
-
-  const expense = new Expense(
-    uuid(),
-    description,
-    amount,
-    paidBy,
-    participants
-  );
-
-  expenses.push(expense);
-
-  res.json(expense);
 }
 
-export function getExpenses(req, res) {
-  res.json(expenses);
+// POST nuova spesa
+export async function createExpense(req, res) {
+  try {
+    const { description, amount, paidBy, participants } = req.body;
+
+    const splitAmount = amount / participants.length;
+
+    const expense = new Expense({
+      description,
+      amount,
+      paidBy,
+      participants,
+      splitAmount
+    });
+
+    await expense.save();
+
+    res.json(expense);
+  } catch (error) {
+    res.status(500).json({ error: "Errore nel salvataggio spesa" });
+  }
 }
