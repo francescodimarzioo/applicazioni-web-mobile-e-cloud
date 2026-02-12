@@ -5,6 +5,7 @@ const expenseSchema = new mongoose.Schema({
   amount: Number,
   paidBy: String,
   participants: [String],
+  splitAmount: Number
 });
 
 export default mongoose.model("Expense", expenseSchema);
