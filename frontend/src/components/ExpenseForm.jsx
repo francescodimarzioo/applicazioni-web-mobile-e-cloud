@@ -15,16 +15,18 @@ export default function ExpenseForm() {
   };
 
   return (
-    <>
+    <div>
       <input
         placeholder="Descrizione"
+        value={desc}
         onChange={e => setDesc(e.target.value)}
       />
       <input
         type="number"
+        value={amount}
         onChange={e => setAmount(e.target.value)}
       />
       <button onClick={submit}>Aggiungi</button>
-    </>
+    </div>
   );
 }
