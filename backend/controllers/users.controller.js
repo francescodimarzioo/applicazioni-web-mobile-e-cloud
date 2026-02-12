@@ -1,16 +1,25 @@
-import { users } from "../data/store.js";
-import User from "../models/User.js";
-import { v4 as uuid } from "uuid";
+import User from "../models/UserModel.js";
 
-export function createUser(req, res) {
-  const { name } = req.body;
-
-  const user = new User(uuid(), name);
-  users.push(user);
-
-  res.json(user);
+// GET tutti gli utenti
+export async function getUsers(req, res) {
+  try {
+    const users = await User.find({});
+    res.json(users);
+  } catch (error) {
+    res.status(500).json({ error: "Errore nel recupero utenti" });
+  }
 }
 
-export function getUsers(req, res) {
-  res.json(users);
+// POST crea nuovo utente
+export async function createUser(req, res) {
+  try {
+    const { name } = req.body;
+
+    const user = new User({ name });
+    await user.save();
+
+    res.json(user);
+  } catch (error) {
+    res.status(500).json({ error: "Errore nel salvataggio utente" });
+  }
 }
