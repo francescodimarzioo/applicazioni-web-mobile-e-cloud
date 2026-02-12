@@ -3,8 +3,11 @@ import User from "../models/User.js";
 import { v4 as uuid } from "uuid";
 
 export function createUser(req, res) {
-  const user = new User(uuid(), req.body.name);
+  const { name } = req.body;
+
+  const user = new User(uuid(), name);
   users.push(user);
+
   res.json(user);
 }
 
