@@ -1,92 +1,252 @@
 import { useEffect, useState } from "react";
-import { getExpenses, addExpense } from "./api";
+import { login, register, getExpenses, addExpense, clearToken, getToken } from "./api";
 
-export default function App() {
+function App() {
+  const [isLoggedIn, setIsLoggedIn] = useState(!!getToken());
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [name, setName] = useState("");
+
   const [expenses, setExpenses] = useState([]);
-  const [desc, setDesc] = useState("");
+  const [description, setDescription] = useState("");
   const [amount, setAmount] = useState("");
-  const [names, setNames] = useState("");
+  const [paidBy, setPaidBy] = useState("");
+  const [participants, setParticipants] = useState("");
+
+  const [error, setError] = useState("");
 
   useEffect(() => {
-    async function fetchData() {
-      const data = await getExpenses();
-      setExpenses(data);
+    if (!isLoggedIn) return;
+
+    async function fetchExpenses() {
+      try {
+        const data = await getExpenses();
+        setExpenses(data);
+      } catch (err) {
+        console.error(err);
+        setError(err.message || "Errore nel caricamento spese");
+      }
     }
 
-    fetchData();
-  }, []);
+    fetchExpenses();
+  }, [isLoggedIn]);
 
-  const handleAdd = async () => {
-    if (!desc || !amount || !names) return;
-
-    // trasformiamo la stringa in array
-    const participants = names
-      .split(",")
-      .map(name => name.trim())
-      .filter(name => name !== "");
-
-    if (participants.length === 0) return;
-
-    await addExpense({
-      description: desc,
-      amount: Number(amount),
-      paidBy: participants[0],
-      participants: participants
-    });
-
-    setDesc("");
-    setAmount("");
-    setNames("");
-
+  async function reloadExpenses() {
     const data = await getExpenses();
     setExpenses(data);
-  };
+  }
+
+  async function handleLogin(e) {
+    e.preventDefault();
+    setError("");
+
+    try {
+      await login({ email, password });
+      setIsLoggedIn(true);
+      setEmail("");
+      setPassword("");
+    } catch (err) {
+      setError(err.message);
+    }
+  }
+
+  async function handleRegister(e) {
+    e.preventDefault();
+    setError("");
+
+    try {
+      await register({ name, email, password });
+      alert("Registrazione completata! Ora fai login.");
+      setName("");
+      setEmail("");
+      setPassword("");
+    } catch (err) {
+      setError(err.message);
+    }
+  }
+
+  function handleLogout() {
+    clearToken();
+    setIsLoggedIn(false);
+    setExpenses([]);
+  }
+
+  async function handleAddExpense(e) {
+    e.preventDefault();
+    setError("");
+
+    try {
+      const parsedParticipants = Array.from(
+        new Set(
+          participants
+            .split(",")
+            .map(p => p.trim())
+            .filter(Boolean)
+        )
+      );
+
+      await addExpense({
+        description: description.trim(),
+        amount: Number(amount),
+        paidBy: paidBy.trim(),
+        participants: parsedParticipants
+      });
+
+      setDescription("");
+      setAmount("");
+      setPaidBy("");
+      setParticipants("");
+
+      await reloadExpenses();
+    } catch (err) {
+      setError(err.message);
+    }
+  }
+
+  if (!isLoggedIn) {
+    return (
+      <div style={{ padding: 40, maxWidth: 520 }}>
+        <h2>Login</h2>
+
+        <form onSubmit={handleLogin}>
+          <input
+            type="email"
+            placeholder="Email"
+            value={email}
+            onChange={e => setEmail(e.target.value)}
+            required
+            style={{ width: "100%", padding: 10 }}
+          />
+          <br /><br />
+          <input
+            type="password"
+            placeholder="Password"
+            value={password}
+            onChange={e => setPassword(e.target.value)}
+            required
+            style={{ width: "100%", padding: 10 }}
+          />
+          <br /><br />
+          <button type="submit" style={{ padding: "10px 16px" }}>
+            Login
+          </button>
+        </form>
+
+        <hr style={{ margin: "30px 0" }} />
+
+        <h2>Register</h2>
+
+        <form onSubmit={handleRegister}>
+          <input
+            type="text"
+            placeholder="Nome (opzionale)"
+            value={name}
+            onChange={e => setName(e.target.value)}
+            style={{ width: "100%", padding: 10 }}
+          />
+          <br /><br />
+          <input
+            type="email"
+            placeholder="Email"
+            value={email}
+            onChange={e => setEmail(e.target.value)}
+            required
+            style={{ width: "100%", padding: 10 }}
+          />
+          <br /><br />
+          <input
+            type="password"
+            placeholder="Password"
+            value={password}
+            onChange={e => setPassword(e.target.value)}
+            required
+            style={{ width: "100%", padding: 10 }}
+          />
+          <br /><br />
+          <button type="submit" style={{ padding: "10px 16px" }}>
+            Register
+          </button>
+        </form>
+
+        {error && <p style={{ color: "red", marginTop: 16 }}>{error}</p>}
+      </div>
+    );
+  }
 
   return (
-    <div style={{ padding: 40 }}>
-      <h1>Expense Split App</h1>
+    <div style={{ padding: 40, maxWidth: 900 }}>
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+        <h1>Gestione Spese</h1>
+        <button onClick={handleLogout} style={{ padding: "10px 16px" }}>
+          Logout
+        </button>
+      </div>
 
-      <input
-        placeholder="Descrizione"
-        value={desc}
-        onChange={(e) => setDesc(e.target.value)}
-      />
+      <h2>Aggiungi Spesa</h2>
+      <form onSubmit={handleAddExpense} style={{ display: "grid", gap: 12, maxWidth: 520 }}>
+        <input
+          type="text"
+          placeholder="Descrizione"
+          value={description}
+          onChange={e => setDescription(e.target.value)}
+          required
+          style={{ padding: 10 }}
+        />
+        <input
+          type="number"
+          placeholder="Importo"
+          value={amount}
+          onChange={e => setAmount(e.target.value)}
+          required
+          style={{ padding: 10 }}
+        />
+        <input
+          type="text"
+          placeholder="Pagato da (nome)"
+          value={paidBy}
+          onChange={e => setPaidBy(e.target.value)}
+          required
+          style={{ padding: 10 }}
+        />
+        <input
+          type="text"
+          placeholder="Partecipanti (separati da virgola) es: Luca, Anna"
+          value={participants}
+          onChange={e => setParticipants(e.target.value)}
+          style={{ padding: 10 }}
+        />
+        <button type="submit" style={{ padding: "10px 16px", width: "fit-content" }}>
+          Aggiungi
+        </button>
+      </form>
 
-      <input
-        type="number"
-        placeholder="Importo"
-        value={amount}
-        onChange={(e) => setAmount(e.target.value)}
-      />
+      {error && <p style={{ color: "red", marginTop: 16 }}>{error}</p>}
 
-      <input
-        placeholder="Nomi separati da virgola (es: Luca, Marco, Anna)"
-        value={names}
-        onChange={(e) => setNames(e.target.value)}
-      />
+      <h2 style={{ marginTop: 30 }}>Lista Spese</h2>
 
-      <button onClick={handleAdd}>Aggiungi</button>
-
-      <ul>
-  {expenses.map((e) => {
-    const participantsCount = e.participants?.length || 1;
-    const split = (e.amount / participantsCount).toFixed(2);
-
-    return (
-      <li key={e._id} style={{ marginBottom: 20 }}>
-        <strong>{e.description}</strong> – {e.amount}€
-
-        <div style={{ marginTop: 10 }}>
-          {e.participants?.map((name, index) => (
-            <div key={index}>
-              {name} → {split}€
-            </div>
+      {expenses.length === 0 ? (
+        <p>Nessuna spesa inserita.</p>
+      ) : (
+        <ul style={{ paddingLeft: 18 }}>
+          {expenses.map(exp => (
+            <li key={exp._id} style={{ marginBottom: 14 }}>
+              <div>
+                <strong>{exp.description}</strong> — {exp.amount}€
+              </div>
+              <div>Pagato da: <strong>{exp.paidBy}</strong></div>
+              <div>
+                Persone: <strong>{exp.participants?.length || 0}</strong> — quota a testa:{" "}
+                <strong>{Number(exp.splitAmount).toFixed(2)}€</strong>
+              </div>
+              <div>
+                Partecipanti: {exp.participants?.join(", ")}
+              </div>
+            </li>
           ))}
-        </div>
-      </li>
-    );
-  })}
-</ul>
+        </ul>
+      )}
     </div>
   );
 }
+
+export default App;
