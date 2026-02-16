@@ -1,11 +1,10 @@
 import User from "../models/UserModel.js";
 
-// GET tutti gli utenti
 export async function getUsers(req, res) {
   try {
-    const users = await User.find({});
+    const users = await User.find({}).select("_id name email");
     res.json(users);
-  } catch (error) {
+  } catch {
     res.status(500).json({ error: "Errore nel recupero utenti" });
   }
 }
