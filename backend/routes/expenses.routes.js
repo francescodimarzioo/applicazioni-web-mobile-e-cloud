@@ -1,10 +1,19 @@
 import express from "express";
-import { createExpense, getExpenses } from "../controllers/expenses.controller.js";
+import {
+  createExpense,
+  getExpenses,
+  updateExpense,
+  deleteExpense
+} from "../controllers/expenses.controller.js";
 import { authMiddleware } from "../middleware/auth.js";
 
 const router = express.Router();
 
-router.post("/", authMiddleware, createExpense);
 router.get("/", authMiddleware, getExpenses);
+router.post("/", authMiddleware, createExpense);
+
+//solo owner può modificare/eliminare
+router.put("/:id", authMiddleware, updateExpense);
+router.delete("/:id", authMiddleware, deleteExpense);
 
 export default router;

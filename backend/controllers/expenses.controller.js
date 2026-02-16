@@ -1,64 +1,74 @@
 import Expense from "../models/ExpenseModel.js";
 
-// GET spese dell'utente loggato
-export async function getExpenses(req, res) {
+export async function updateExpense(req, res) {
   try {
-    const expenses = await Expense.find({ owner: req.user.sub });
-    res.json(expenses);
-  } catch (e) {
-    console.error(e);
-    res.status(500).json({ error: "Errore nel recupero spese" });
-  }
-}
+    const { id } = req.params;
 
-// POST nuova spesa dell'utente loggato
-export async function createExpense(req, res) {
-  try {
+    const expense = await Expense.findById(id);
+    if (!expense) return res.status(404).json({ message: "Spesa non trovata" });
+
+    // 🔒 Authorization check: solo owner
+    if (expense.owner.toString() !== req.user.sub) {
+      return res.status(403).json({ message: "Non sei autorizzato" });
+    }
+
+    // Aggiorna solo campi permessi
     const { description, amount, paidBy, participants } = req.body;
 
-    // 1) Normalizza partecipanti (trim, rimuovi vuoti, rimuovi duplicati)
-    const cleanedParticipants = Array.from(
-      new Set((participants || []).map(p => String(p).trim()).filter(Boolean))
-    );
+    if (description !== undefined) expense.description = String(description).trim();
 
-    // 2) Normalizza pagante
-    const cleanedPaidBy = String(paidBy || "").trim();
-    if (!cleanedPaidBy) {
-      return res.status(400).json({ message: "Inserisci 'Pagato da'" });
+    if (amount !== undefined) {
+      const numericAmount = Number(amount);
+      if (!Number.isFinite(numericAmount) || numericAmount <= 0) {
+        return res.status(400).json({ message: "Importo non valido" });
+      }
+      expense.amount = numericAmount;
     }
 
-    // 3) Include sempre il pagante nella lista se non c'è già
-    if (!cleanedParticipants.includes(cleanedPaidBy)) {
-      cleanedParticipants.push(cleanedPaidBy);
+    if (paidBy !== undefined) expense.paidBy = String(paidBy).trim();
+
+    if (participants !== undefined) {
+      const cleanedParticipants = Array.from(
+        new Set((participants || []).map(p => String(p).trim()).filter(Boolean))
+      );
+
+      const cleanedPaidBy = String(expense.paidBy || "").trim();
+      if (cleanedPaidBy && !cleanedParticipants.includes(cleanedPaidBy)) {
+        cleanedParticipants.push(cleanedPaidBy);
+      }
+
+      expense.participants = cleanedParticipants;
+      expense.splitAmount = expense.amount / cleanedParticipants.length;
+    } else {
+      // se cambi l'importo ma non i partecipanti, ricalcola split comunque
+      const count = (expense.participants?.length || 0) || 1;
+      expense.splitAmount = expense.amount / count;
     }
-
-    // 4) Validazione lista persone
-    if (cleanedParticipants.length === 0) {
-      return res.status(400).json({ message: "Inserisci almeno una persona" });
-    }
-
-    // 5) Validazione importo
-    const numericAmount = Number(amount);
-    if (!Number.isFinite(numericAmount) || numericAmount <= 0) {
-      return res.status(400).json({ message: "Importo non valido" });
-    }
-
-    // 6) Split tra partecipanti + pagante
-    const splitAmount = numericAmount / cleanedParticipants.length;
-
-    const expense = new Expense({
-      owner: req.user.sub,
-      description,
-      amount: numericAmount,
-      paidBy: cleanedPaidBy,
-      participants: cleanedParticipants,
-      splitAmount
-    });
 
     await expense.save();
     res.json(expense);
   } catch (e) {
     console.error(e);
-    res.status(500).json({ error: "Errore nel salvataggio spesa" });
+    res.status(500).json({ message: "Errore server" });
+  }
+}
+
+export async function deleteExpense(req, res) {
+  try {
+    const { id } = req.params;
+
+    const expense = await Expense.findById(id);
+    if (!expense) return res.status(404).json({ message: "Spesa non trovata" });
+
+    // Authorization check
+    if (expense.owner.toString() !== req.user.sub) {
+      return res.status(403).json({ message: "Non sei autorizzato" });
+    }
+
+    await expense.deleteOne();
+    res.json({ message: "Spesa eliminata" });
+  } catch (e) {
+    console.error(e);
+    res.status(500).json({ message: "Errore server" });
   }
 }

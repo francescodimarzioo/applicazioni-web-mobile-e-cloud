@@ -176,7 +176,7 @@ function App() {
   return (
     <div style={{ padding: 40, maxWidth: 900 }}>
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-        <h1>Gestione Spese</h1>
+        <h1>ExpenseSplitApp</h1>
         <button onClick={handleLogout} style={{ padding: "10px 16px" }}>
           Logout
         </button>
