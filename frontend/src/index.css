@@ -235,9 +235,6 @@ body{
     border-bottom:none;
   }
 }
-/* =========================
-   START PAGE
-========================= */
 
 .startPage{
   position: relative;
@@ -266,8 +263,6 @@ body{
   font-size: 22px;
   padding: 20px 40px;
 }
-
-/* Cascata monete animata */
 
 .coinsBackground{
   position:absolute;
