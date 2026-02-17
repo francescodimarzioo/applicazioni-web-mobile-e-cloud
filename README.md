@@ -7,7 +7,7 @@
 ##  Descrizione del Progetto
 
 Questo progetto consiste nello sviluppo di un'applicazione
-**full-stack** per la gestione delle spese personali.\
+**full-stack** per la gestione delle spese personali e di gruppo.\
 L'applicazione è realizzata secondo un'architettura moderna separando
 chiaramente:
 
