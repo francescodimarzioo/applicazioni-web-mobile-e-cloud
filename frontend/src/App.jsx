@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import { login, register, getExpenses, addExpense, clearToken, getToken } from "./api";
 
 function App() {
+  const [hasStarted, setHasStarted] = useState(false);
   const [isLoggedIn, setIsLoggedIn] = useState(!!getToken());
 
   const [email, setEmail] = useState("");
@@ -17,6 +18,7 @@ function App() {
   const [error, setError] = useState("");
 
   useEffect(() => {
+    if (!hasStarted) return;
     if (!isLoggedIn) return;
 
     async function fetchExpenses() {
@@ -24,13 +26,12 @@ function App() {
         const data = await getExpenses();
         setExpenses(data);
       } catch (err) {
-        console.error(err);
-        setError(err.message || "Errore nel caricamento spese");
+        setError(err.message);
       }
     }
 
     fetchExpenses();
-  }, [isLoggedIn]);
+  }, [hasStarted, isLoggedIn]);
 
   async function reloadExpenses() {
     const data = await getExpenses();
@@ -81,8 +82,8 @@ function App() {
         new Set(
           participants
             .split(",")
-            .map(p => p.trim())
-            .filter(Boolean) // <-- FIX: prima era ".filte"
+            .map((p) => p.trim())
+            .filter(Boolean)
         )
       );
 
@@ -106,38 +107,64 @@ function App() {
 
   const stats = useMemo(() => {
     const total = expenses.reduce((sum, e) => sum + Number(e.amount || 0), 0);
-    const count = expenses.length;
-    return { total, count };
+    return { total, count: expenses.length };
   }, [expenses]);
+
+  // helper: quota per persona (usa splitAmount se esiste, sennò calcola)
+  function getSplitAmount(exp) {
+    const backendSplit = Number(exp?.splitAmount);
+    if (Number.isFinite(backendSplit) && backendSplit > 0) return backendSplit;
+
+    const amt = Number(exp?.amount || 0);
+    const n = Array.isArray(exp?.participants) ? exp.participants.length : 0;
+    if (!n) return 0;
+    return amt / n;
+  }
+
+  if (!hasStarted) {
+    return (
+      <div className="startPage">
+        <div className="coinsBackground"></div>
+
+        <div className="startContent">
+          <h1 className="startTitle">💰ExpenseSplitApp</h1>
+          <button
+            className="btn btnPrimary startButton"
+            onClick={() => setHasStarted(true)}
+          >
+            Avvia
+          </button>
+        </div>
+      </div>
+    );
+  }
 
   if (!isLoggedIn) {
     return (
       <div className="container">
         <div className="header">
           <div>
-            <h1 className="title">ExpenseSplitApp</h1>
+            <h1 className="title">💰ExpenseSplitApp</h1>
             <p className="sub">Accedi o registrati per gestire le spese.</p>
           </div>
         </div>
 
         <div className="grid2">
           <div className="card">
-            <div className="cardHeader">
-              <h2 className="title" style={{ fontSize: 18 }}>Login</h2>
-            </div>
+            <h2>Login</h2>
 
             <form onSubmit={handleLogin}>
               <label className="label">Email</label>
               <input
                 className="input"
                 type="email"
-                placeholder="Inserisci la tua email"
+                placeholder="Inserisci email"
                 value={email}
-                onChange={e => setEmail(e.target.value)}
+                onChange={(e) => setEmail(e.target.value)}
                 required
               />
 
-              <div style={{ height: 10 }} />
+              <div style={{ height: 12 }} />
 
               <label className="label">Password</label>
               <input
@@ -145,48 +172,44 @@ function App() {
                 type="password"
                 placeholder="••••••••"
                 value={password}
-                onChange={e => setPassword(e.target.value)}
+                onChange={(e) => setPassword(e.target.value)}
                 required
               />
 
-              <div style={{ height: 12 }} />
+              <div style={{ height: 16 }} />
 
-              <button className="btn btnPrimary" type="submit">
-                Login
-              </button>
+              <button className="btn btnPrimary">Login</button>
 
               {error && <div className="alert">{error}</div>}
             </form>
           </div>
 
           <div className="card">
-            <div className="cardHeader">
-              <h2 className="title" style={{ fontSize: 18 }}>Register</h2>
-            </div>
+            <h2>Register</h2>
 
             <form onSubmit={handleRegister}>
               <label className="label">Nome e Cognome</label>
               <input
                 className="input"
                 type="text"
-                placeholder="Inserisci il tuo nome e cognome"
+                placeholder="Inserisci nome e cognome"
                 value={name}
-                onChange={e => setName(e.target.value)}
+                onChange={(e) => setName(e.target.value)}
               />
 
-              <div style={{ height: 10 }} />
+              <div style={{ height: 12 }} />
 
               <label className="label">Email</label>
               <input
                 className="input"
                 type="email"
-                placeholder="Inserisci la tua email"
+                placeholder="Inserisci email"
                 value={email}
-                onChange={e => setEmail(e.target.value)}
+                onChange={(e) => setEmail(e.target.value)}
                 required
               />
 
-              <div style={{ height: 10 }} />
+              <div style={{ height: 12 }} />
 
               <label className="label">Password</label>
               <input
@@ -194,17 +217,13 @@ function App() {
                 type="password"
                 placeholder="••••••••"
                 value={password}
-                onChange={e => setPassword(e.target.value)}
+                onChange={(e) => setPassword(e.target.value)}
                 required
               />
 
-              <div style={{ height: 12 }} />
+              <div style={{ height: 16 }} />
 
-              <button className="btn" type="submit">
-                Register
-              </button>
-
-              {error && <div className="alert">{error}</div>}
+              <button className="btn">Register</button>
             </form>
           </div>
         </div>
@@ -216,9 +235,9 @@ function App() {
     <div className="container">
       <div className="header">
         <div>
-          <h1 className="title">ExpenseSplitApp</h1>
+          <h1 className="title">💰ExpenseSplitApp</h1>
           <p className="sub">
-            {stats.count} spese totali • Totale: <strong>€ {stats.total.toFixed(2)}</strong>
+            {stats.count} spese • Totale: € {stats.total.toFixed(2)}
           </p>
         </div>
         <button className="btn" onClick={handleLogout}>
@@ -228,75 +247,61 @@ function App() {
 
       <div className="grid2">
         <div className="card">
-          <div className="cardHeader">
-            <h2 className="title" style={{ fontSize: 18 }}>Aggiungi spesa</h2>
-          </div>
+          <h2>Aggiungi spesa</h2>
 
           <form onSubmit={handleAddExpense}>
             <label className="label">Descrizione</label>
             <input
               className="input"
-              type="text"
-              placeholder="Es. Cena, Benzina…"
               value={description}
-              onChange={e => setDescription(e.target.value)}
+              onChange={(e) => setDescription(e.target.value)}
               required
             />
 
-            <div style={{ height: 10 }} />
+            <div style={{ height: 12 }} />
 
             <label className="label">Importo</label>
             <input
               className="input"
               type="number"
-              placeholder="Es. 25"
               value={amount}
-              onChange={e => setAmount(e.target.value)}
+              onChange={(e) => setAmount(e.target.value)}
               required
-            />
-
-            <div style={{ height: 10 }} />
-
-            <label className="label">Pagato da</label>
-            <input
-              className="input"
-              type="text"
-              placeholder="Es. Luca"
-              value={paidBy}
-              onChange={e => setPaidBy(e.target.value)}
-              required
-            />
-
-            <div style={{ height: 10 }} />
-
-            <label className="label">Partecipanti (separati da virgola)</label>
-            <input
-              className="input"
-              type="text"
-              placeholder="Es. Luca, Anna, Marco"
-              value={participants}
-              onChange={e => setParticipants(e.target.value)}
             />
 
             <div style={{ height: 12 }} />
 
-            <div className="actionsRow">
-              <button className="btn btnPrimary" type="submit">
-                Aggiungi
-              </button>
-            </div>
+            <label className="label">Pagato da</label>
+            <input
+              className="input"
+              value={paidBy}
+              onChange={(e) => setPaidBy(e.target.value)}
+              required
+            />
+
+            <div style={{ height: 12 }} />
+
+            <label className="label">Partecipanti (separati da virgola)</label>
+            <input
+              className="input"
+              value={participants}
+              onChange={(e) => setParticipants(e.target.value)}
+              placeholder="Es. Luca, Anna, Marco"
+            />
+
+            <div style={{ height: 16 }} />
+
+            <button className="btn btnPrimary">Aggiungi</button>
 
             {error && <div className="alert">{error}</div>}
           </form>
         </div>
 
         <div className="card">
-          <div className="cardHeader">
-            <h2 className="title" style={{ fontSize: 18 }}>Lista spese</h2>
-          </div>
+          <h2>Lista spese</h2>
 
           {expenses.length === 0 ? (
-            <p className="sub">Nessuna spesa inserita.</p>
+            <p>Nessuna spesa inserita.</p>
           ) : (
             <table className="table">
               <thead>
@@ -305,19 +310,30 @@ function App() {
                   <th>Importo</th>
                   <th>Pagato da</th>
                   <th>Partecipanti</th>
-                  <th>Quota</th>
+                  <th>Quota (€/persona)</th>
                 </tr>
               </thead>
               <tbody>
-                {expenses.map(exp => (
-                  <tr key={exp._id}>
-                    <td data-label="Descrizione"><strong>{exp.description}</strong></td>
-                    <td data-label="Importo">€ {Number(exp.amount).toFixed(2)}</td>
-                    <td data-label="Pagato da">{exp.paidBy}</td>
-                    <td data-label="Partecipanti">{(exp.participants || []).join(", ")}</td>
-                    <td data-label="Quota">€ {Number(exp.splitAmount || 0).toFixed(2)}</td>
-                  </tr>
-                ))}
+                {expenses.map((exp) => {
+                  const ppl = Array.isArray(exp.participants) ? exp.participants : [];
+                  const split = getSplitAmount(exp);
+
+                  return (
+                    <tr key={exp._id}>
+                      <td data-label="Descrizione">
+                        <strong>{exp.description}</strong>
+                      </td>
+                      <td data-label="Importo">
+                        € {Number(exp.amount || 0).toFixed(2)}
+                      </td>
+                      <td data-label="Pagato da">{exp.paidBy}</td>
+                      <td data-label="Partecipanti">{ppl.join(", ")}</td>
+                      <td data-label="Quota (€/persona)">
+                        € {Number(split || 0).toFixed(2)}
+                      </td>
+                    </tr>
+                  );
+                })}
               </tbody>
             </table>
           )}

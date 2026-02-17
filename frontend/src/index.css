@@ -235,3 +235,51 @@ body{
     border-bottom:none;
   }
 }
+/* =========================
+   START PAGE
+========================= */
+
+.startPage{
+  position: relative;
+  height: 100vh;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  overflow:hidden;
+  background: linear-gradient(180deg, #eff6ff, #ffffff);
+}
+
+.startContent{
+  position: relative;
+  z-index: 2;
+  text-align:center;
+}
+
+.startTitle{
+  font-size: 56px;
+  font-weight: 900;
+  letter-spacing: -0.03em;
+  margin-bottom: 40px;
+}
+
+.startButton{
+  font-size: 22px;
+  padding: 20px 40px;
+}
+
+/* Cascata monete animata */
+
+.coinsBackground{
+  position:absolute;
+  inset:0;
+  background-image: url("https://pngimg.com/uploads/coin/coin_PNG36871.png");
+  background-size: 120px;
+  opacity: 0.05;
+  animation: fall 20s linear infinite;
+}
+
+@keyframes fall{
+  from { background-position: 0 -1000px; }
+  to { background-position: 0 1000px; }
+}
+
