@@ -160,7 +160,7 @@ function App() {
         <div className="coinsBackground"></div>
 
         <div className="startContent">
-          <h1 className="startTitle">ExpenseSplitApp</h1>
+          <h1 className="startTitle">💰ExpenseSplitApp</h1>
           <button
             className="btn btnPrimary startButton"
             onClick={() => setHasStarted(true)}
@@ -177,7 +177,7 @@ function App() {
       <div className="container">
         <div className="header">
           <div>
-            <h1 className="title">ExpenseSplitApp</h1>
+            <h1 className="title">💰ExpenseSplitApp</h1>
             <p className="sub">Accedi o registrati per gestire le spese.</p>
           </div>
         </div>
@@ -191,7 +191,7 @@ function App() {
               <input
                 className="input"
                 type="email"
-                placeholder="nome@email.com"
+                placeholder="Inserisci Email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 required
@@ -221,11 +221,11 @@ function App() {
             <h2>Register</h2>
 
             <form onSubmit={handleRegister}>
-              <label className="label">Nome</label>
+              <label className="label">Nome e Cognome</label>
               <input
                 className="input"
                 type="text"
-                placeholder="Francesco"
+                placeholder="Inserisci Nome e Cognome"
                 value={name}
                 onChange={(e) => setName(e.target.value)}
               />
@@ -236,7 +236,7 @@ function App() {
               <input
                 className="input"
                 type="email"
-                placeholder="nome@email.com"
+                placeholder="Inserisci Email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 required
@@ -268,7 +268,7 @@ function App() {
     <div className="container">
       <div className="header">
         <div>
-          <h1 className="title">Dashboard</h1>
+          <h1 className="title">💰ExpenseSplitApp</h1>
           <p className="sub">
             {stats.count} spese • Totale: € {stats.total.toFixed(2)}
           </p>
