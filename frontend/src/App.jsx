@@ -1,5 +1,13 @@
 import { useEffect, useMemo, useState } from "react";
-import { login, register, getExpenses, addExpense, clearToken, getToken } from "./api";
+import {
+  login,
+  register,
+  getExpenses,
+  addExpense,
+  deleteExpense,
+  clearToken,
+  getToken,
+} from "./api";
 
 function App() {
   const [hasStarted, setHasStarted] = useState(false);
@@ -16,6 +24,10 @@ function App() {
   const [participants, setParticipants] = useState("");
 
   const [error, setError] = useState("");
+
+  
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [expenseToDelete, setExpenseToDelete] = useState(null);
 
   useEffect(() => {
     if (!hasStarted) return;
@@ -82,7 +94,7 @@ function App() {
         new Set(
           participants
             .split(",")
-            .map(p => p.trim())
+            .map((p) => p.trim())
             .filter(Boolean)
         )
       );
@@ -105,11 +117,32 @@ function App() {
     }
   }
 
+  
+  function handleDeleteExpense(id) {
+    setExpenseToDelete(id);
+    setShowDeleteModal(true);
+  }
+
+ 
+  async function confirmDelete() {
+    if (!expenseToDelete) return;
+
+    setError("");
+    try {
+      await deleteExpense(expenseToDelete);
+      await reloadExpenses();
+    } catch (err) {
+      setError(err.message);
+    }
+
+    setShowDeleteModal(false);
+    setExpenseToDelete(null);
+  }
+
   const stats = useMemo(() => {
     const total = expenses.reduce((sum, e) => sum + Number(e.amount || 0), 0);
     return { total, count: expenses.length };
   }, [expenses]);
-
 
   function getSplitAmount(exp) {
     const backendSplit = Number(exp?.splitAmount);
@@ -127,7 +160,7 @@ function App() {
         <div className="coinsBackground"></div>
 
         <div className="startContent">
-          <h1 className="startTitle">💰ExpenseSplitApp</h1>
+          <h1 className="startTitle">ExpenseSplitApp</h1>
           <button
             className="btn btnPrimary startButton"
             onClick={() => setHasStarted(true)}
@@ -144,7 +177,7 @@ function App() {
       <div className="container">
         <div className="header">
           <div>
-            <h1 className="title">💰ExpenseSplitApp</h1>
+            <h1 className="title">ExpenseSplitApp</h1>
             <p className="sub">Accedi o registrati per gestire le spese.</p>
           </div>
         </div>
@@ -158,7 +191,7 @@ function App() {
               <input
                 className="input"
                 type="email"
-                placeholder="Inserisci email"
+                placeholder="nome@email.com"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 required
@@ -188,11 +221,11 @@ function App() {
             <h2>Register</h2>
 
             <form onSubmit={handleRegister}>
-              <label className="label">Nome e Cognome</label>
+              <label className="label">Nome</label>
               <input
                 className="input"
                 type="text"
-                placeholder="Inserisci nome e cognome"
+                placeholder="Francesco"
                 value={name}
                 onChange={(e) => setName(e.target.value)}
               />
@@ -203,7 +236,7 @@ function App() {
               <input
                 className="input"
                 type="email"
-                placeholder="Inserisci email"
+                placeholder="nome@email.com"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 required
@@ -235,7 +268,7 @@ function App() {
     <div className="container">
       <div className="header">
         <div>
-          <h1 className="title">💰ExpenseSplitApp</h1>
+          <h1 className="title">Dashboard</h1>
           <p className="sub">
             {stats.count} spese • Totale: € {stats.total.toFixed(2)}
           </p>
@@ -311,8 +344,10 @@ function App() {
                   <th>Pagato da</th>
                   <th>Partecipanti</th>
                   <th>Quota (€/persona)</th>
+                  <th>Azioni</th>
                 </tr>
               </thead>
+
               <tbody>
                 {expenses.map((exp) => {
                   const ppl = Array.isArray(exp.participants) ? exp.participants : [];
@@ -331,6 +366,19 @@ function App() {
                       <td data-label="Quota (€/persona)">
                         € {Number(split || 0).toFixed(2)}
                       </td>
+                      <td data-label="Azioni">
+                        <button
+                          className="btn"
+                          onClick={() => handleDeleteExpense(exp._id)}
+                          style={{
+                            background: "rgba(220,38,38,.10)",
+                            borderColor: "rgba(220,38,38,.25)",
+                            color: "#991b1b",
+                          }}
+                        >
+                          Elimina
+                        </button>
+                      </td>
                     </tr>
                   );
                 })}
@@ -339,6 +387,38 @@ function App() {
           )}
         </div>
       </div>
+
+      
+      {showDeleteModal && (
+        <div
+          className="modalOverlay"
+          onClick={() => {
+            setShowDeleteModal(false);
+            setExpenseToDelete(null);
+          }}
+        >
+          <div className="modalBox" onClick={(e) => e.stopPropagation()}>
+            <div className="modalTitle">Eliminare questa spesa?</div>
+            <div className="modalText">Questa azione non può essere annullata.</div>
+
+            <div className="modalActions">
+              <button
+                className="btn"
+                onClick={() => {
+                  setShowDeleteModal(false);
+                  setExpenseToDelete(null);
+                }}
+              >
+                Annulla
+              </button>
+
+              <button className="btn btnDanger" onClick={confirmDelete}>
+                Elimina
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
