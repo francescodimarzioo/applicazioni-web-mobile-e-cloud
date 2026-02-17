@@ -5,7 +5,7 @@ import User from "../models/UserModel.js";
 
 const router = express.Router();
 
-// REGISTER
+//REGISTER
 router.post("/register", async (req, res) => {
   try {
     const { name, email, password } = req.body;
@@ -32,7 +32,7 @@ router.post("/register", async (req, res) => {
   }
 });
 
-// LOGIN
+//LOGIN
 router.post("/login", async (req, res) => {
   try {
     const { email, password } = req.body;

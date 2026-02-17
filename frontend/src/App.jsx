@@ -82,7 +82,7 @@ function App() {
           participants
             .split(",")
             .map(p => p.trim())
-            .filter(Boolean) // <-- FIX: prima era ".filte"
+            .filter(Boolean) 
         )
       );
 

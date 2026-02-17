@@ -29,7 +29,6 @@ export async function createExpense(req, res) {
       new Set((participants || []).map(p => String(p).trim()).filter(Boolean))
     );
 
-    // Assicura che chi ha pagato sia tra i partecipanti
     if (cleanedPaidBy && !cleanedParticipants.includes(cleanedPaidBy)) {
       cleanedParticipants.push(cleanedPaidBy);
     }
@@ -61,7 +60,6 @@ export async function updateExpense(req, res) {
     const expense = await Expense.findById(id);
     if (!expense) return res.status(404).json({ message: "Spesa non trovata" });
 
-    // 🔒 solo owner può modificare
     if (expense.owner.toString() !== req.user.sub) {
       return res.status(403).json({ message: "Non sei autorizzato" });
     }
@@ -114,7 +112,6 @@ export async function deleteExpense(req, res) {
     const expense = await Expense.findById(id);
     if (!expense) return res.status(404).json({ message: "Spesa non trovata" });
 
-    // 🔒 solo owner può eliminare
     if (expense.owner.toString() !== req.user.sub) {
       return res.status(403).json({ message: "Non sei autorizzato" });
     }
