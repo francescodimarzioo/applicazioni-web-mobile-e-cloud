@@ -82,7 +82,7 @@ function App() {
         new Set(
           participants
             .split(",")
-            .map((p) => p.trim())
+            .map(p => p.trim())
             .filter(Boolean)
         )
       );
@@ -110,7 +110,7 @@ function App() {
     return { total, count: expenses.length };
   }, [expenses]);
 
-  // helper: quota per persona (usa splitAmount se esiste, sennò calcola)
+
   function getSplitAmount(exp) {
     const backendSplit = Number(exp?.splitAmount);
     if (Number.isFinite(backendSplit) && backendSplit > 0) return backendSplit;

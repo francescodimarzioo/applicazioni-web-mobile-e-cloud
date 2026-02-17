@@ -12,7 +12,6 @@ const router = express.Router();
 router.get("/", authMiddleware, getExpenses);
 router.post("/", authMiddleware, createExpense);
 
-//solo owner può modificare/eliminare
 router.put("/:id", authMiddleware, updateExpense);
 router.delete("/:id", authMiddleware, deleteExpense);
 

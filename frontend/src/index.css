@@ -26,15 +26,15 @@ body{
   font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial;
   color:var(--text);
   background: linear-gradient(180deg, var(--brand-50), #fff 420px);
-  font-size: 18px; /* 🔥 tutto più grande */
+  font-size: 18px;
 }
 
 
 
 .container{
-  max-width: 1300px; /* più largo */
+  max-width: 1300px;
   margin: 0 auto;
-  padding: 36px;     /* più spazio */
+  padding: 36px;
 }
 
 .header{
@@ -48,7 +48,7 @@ body{
 .title{
   margin:0;
   letter-spacing:-0.02em;
-  font-size: 30px;  /* più grande */
+  font-size: 30px;
   font-weight: 800;
 }
 
@@ -76,7 +76,7 @@ body{
   border: 1px solid var(--border);
   border-radius: var(--radius);
   box-shadow: var(--shadow-sm);
-  padding: 26px; /* più spazio interno */
+  padding: 26px;
 }
 
 .cardHeader{
@@ -99,7 +99,7 @@ body{
 
 .input{
   width:100%;
-  padding: 16px 18px;  /* più grande */
+  padding: 16px 18px;
   border-radius: 16px;
   border: 1px solid var(--border);
   background: #fff;
@@ -121,7 +121,7 @@ body{
   background: white;
   color: var(--text);
   border-radius: 16px;
-  padding: 16px 22px;   /* più grande */
+  padding: 16px 22px;
   font-size: 17px;
   font-weight: 800;
   cursor:pointer;
