@@ -8,6 +8,7 @@ import {
   clearToken,
   getToken,
 } from "./api";
+import ExpenseCharts from "./components/ExpenseCharts";
 
 function App() {
   const [hasStarted, setHasStarted] = useState(false);
@@ -25,9 +26,14 @@ function App() {
 
   const [error, setError] = useState("");
 
-  
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [expenseToDelete, setExpenseToDelete] = useState(null);
+
+  // grafici
+  const [showCharts, setShowCharts] = useState(false);
+
+  // 🔎 ricerca descrizione
+  const [searchDescription, setSearchDescription] = useState("");
 
   useEffect(() => {
     if (!hasStarted) return;
@@ -83,6 +89,8 @@ function App() {
     clearToken();
     setIsLoggedIn(false);
     setExpenses([]);
+    setShowCharts(false);
+    setSearchDescription("");
   }
 
   async function handleAddExpense(e) {
@@ -117,13 +125,11 @@ function App() {
     }
   }
 
-  
   function handleDeleteExpense(id) {
     setExpenseToDelete(id);
     setShowDeleteModal(true);
   }
 
- 
   async function confirmDelete() {
     if (!expenseToDelete) return;
 
@@ -144,6 +150,16 @@ function App() {
     return { total, count: expenses.length };
   }, [expenses]);
 
+  // 🔎 lista filtrata per descrizione
+  const filteredExpenses = useMemo(() => {
+    const q = searchDescription.trim().toLowerCase();
+    if (!q) return expenses;
+
+    return expenses.filter((e) =>
+      String(e?.description || "").toLowerCase().includes(q)
+    );
+  }, [expenses, searchDescription]);
+
   function getSplitAmount(exp) {
     const backendSplit = Number(exp?.splitAmount);
     if (Number.isFinite(backendSplit) && backendSplit > 0) return backendSplit;
@@ -152,6 +168,20 @@ function App() {
     const n = Array.isArray(exp?.participants) ? exp.participants.length : 0;
     if (!n) return 0;
     return amt / n;
+  }
+
+  // 🗓️ format data aggiunta
+  function formatDateTime(dateLike) {
+    if (!dateLike) return "-";
+    const d = new Date(dateLike);
+    if (Number.isNaN(d.getTime())) return "-";
+    return d.toLocaleString("it-IT", {
+      day: "2-digit",
+      month: "2-digit",
+      year: "numeric",
+      hour: "2-digit",
+      minute: "2-digit",
+    });
   }
 
   if (!hasStarted) {
@@ -273,9 +303,16 @@ function App() {
             {stats.count} spese • Totale: € {stats.total.toFixed(2)}
           </p>
         </div>
-        <button className="btn" onClick={handleLogout}>
-          Logout
-        </button>
+
+        <div style={{ display: "flex", gap: 10, alignItems: "center" }}>
+          <button className="btn" onClick={() => setShowCharts((v) => !v)}>
+            {showCharts ? "Nascondi grafici" : "Mostra grafici"}
+          </button>
+
+          <button className="btn" onClick={handleLogout}>
+            Logout
+          </button>
+        </div>
       </div>
 
       <div className="grid2">
@@ -333,14 +370,36 @@ function App() {
         <div className="card">
           <h2>Lista spese</h2>
 
-          {expenses.length === 0 ? (
-            <p>Nessuna spesa inserita.</p>
+          {/* 🔎 barra ricerca */}
+          <div style={{ display: "flex", gap: 10, margin: "10px 0 14px" }}>
+            <input
+              className="input"
+              value={searchDescription}
+              onChange={(e) => setSearchDescription(e.target.value)}
+              placeholder="🔎 Cerca per descrizione..."
+            />
+            <button
+              className="btn"
+              type="button"
+              onClick={() => setSearchDescription("")}
+            >
+              Reset
+            </button>
+          </div>
+
+          {filteredExpenses.length === 0 ? (
+            <p>
+              {expenses.length === 0
+                ? "Nessuna spesa inserita."
+                : "Nessuna spesa corrisponde alla ricerca."}
+            </p>
           ) : (
             <table className="table">
               <thead>
                 <tr>
                   <th>Descrizione</th>
                   <th>Importo</th>
+                  <th>Data aggiunta</th>
                   <th>Pagato da</th>
                   <th>Partecipanti</th>
                   <th>Quota (€/persona)</th>
@@ -349,8 +408,10 @@ function App() {
               </thead>
 
               <tbody>
-                {expenses.map((exp) => {
-                  const ppl = Array.isArray(exp.participants) ? exp.participants : [];
+                {filteredExpenses.map((exp) => {
+                  const ppl = Array.isArray(exp.participants)
+                    ? exp.participants
+                    : [];
                   const split = getSplitAmount(exp);
 
                   return (
@@ -361,6 +422,12 @@ function App() {
                       <td data-label="Importo">
                         € {Number(exp.amount || 0).toFixed(2)}
                       </td>
+
+                      {/* 🗓️ data aggiunta */}
+                      <td data-label="Data aggiunta">
+                        {formatDateTime(exp.createdAt)}
+                      </td>
+
                       <td data-label="Pagato da">{exp.paidBy}</td>
                       <td data-label="Partecipanti">{ppl.join(", ")}</td>
                       <td data-label="Quota (€/persona)">
@@ -388,7 +455,14 @@ function App() {
         </div>
       </div>
 
-      
+      {/* grafici */}
+      {showCharts && (
+        <div className="chartsWrap" style={{ marginTop: 16 }}>
+          <ExpenseCharts expenses={expenses} />
+        </div>
+      )}
+
+      {/* modal delete */}
       {showDeleteModal && (
         <div
           className="modalOverlay"
