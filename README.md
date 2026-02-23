@@ -1,184 +1,166 @@
-#  ExpenseSplitApp
+# 💰 Expense Split -- Web Application
 
-## Progetto di Applicazioni Web, Mobile e Cloud
+Applicazione web full-stack per la gestione e suddivisione delle spese
+tra utenti.
 
-------------------------------------------------------------------------
+Il progetto è stato sviluppato come esercitazione per il corso di
+**Applicazioni Web, Mobile e Cloud** e include:
 
-##  Descrizione del Progetto
-
-Questo progetto consiste nello sviluppo di un'applicazione
-**full-stack** per la gestione delle spese personali e di gruppo.\
-L'applicazione è realizzata secondo un'architettura moderna separando
-chiaramente:
-
--   **Frontend (Single Page Application)**
--   **Backend (API REST)**
--   **Database (MongoDB)**
-
-L'obiettivo è rispettare i requisiti del corso: - Applicazione web
-fruibile anche da dispositivi mobile - Architettura SPA - Backend
-separato - DBMS per la persistenza dei dati - Autenticazione sicura
+-   Backend REST API (Node.js + Express)
+-   Frontend SPA (React + Vite)
+-   Database MongoDB
+-   Containerizzazione Docker
+-   Test automatici
+-   CI/CD con GitHub Actions
+-   Deploy pubblico (Render + Vercel)
 
 ------------------------------------------------------------------------
 
-#  Architettura del Sistema
+#  Live Deployment
 
-    applicazioni-web-mobile-e-cloud/
-    │
-    ├── frontend/   # React SPA (Vite)
-    └── backend/    # Express API + MongoDB
+-   🔹 Backend (Render)\
+    https://applicazioni-web-mobile-e-cloud.onrender.com
 
-L'applicazione adotta una chiara separazione delle responsabilità:
-
--   **Frontend** → Presentazione e interazione utente\
--   **Backend** → Logica di business e gestione API\
--   **Database** → Persistenza dati
+-   🔹 Frontend (Vercel)\
+    https://TUO-FRONTEND.vercel.app
 
 ------------------------------------------------------------------------
 
-#  Frontend
+#  Architettura
 
-##  Tecnologie Utilizzate
-
--   React 19
--   Vite 7
--   JavaScript
--   CSS
--   ESLint
-
-##  Caratteristiche
-
--   Architettura Single Page Application
--   Componentizzazione tramite React
--   Comunicazione REST con backend
--   Gestione stato lato client
--   Layout responsive (compatibile mobile)
-
-##  Avvio Frontend
-
-``` bash
-cd frontend
-npm install
-npm run dev
+``` mermaid
+flowchart LR
+    User --> Frontend[React + Vite (Vercel)]
+    Frontend --> Backend[Node.js + Express (Render)]
+    Backend --> MongoDB[(MongoDB Atlas)]
 ```
 
-Disponibile su:
+------------------------------------------------------------------------
 
-    http://localhost:5173
+#  Containerizzazione
+
+L'applicazione è completamente containerizzata tramite Docker.
+
+Componenti: - backend/Dockerfile - frontend/Dockerfile -
+docker-compose.yml - Volume persistente per MongoDB
+
+Avvio completo locale:
+
+docker compose up --build
+
+Servizi disponibili: - Frontend → http://localhost:5173 - Backend →
+http://localhost:3001/health - MongoDB → mongodb://localhost:27017
 
 ------------------------------------------------------------------------
 
-# Backend
+#  Setup Manuale (senza Docker)
 
-## Tecnologie Utilizzate
+## Backend
 
--   Node.js
--   Express 4
--   MongoDB
--   Mongoose 9
--   JWT (jsonwebtoken)
--   bcrypt
--   cors
--   dotenv
--   uuid
-
-------------------------------------------------------------------------
-
-## Struttura Backend
-
-    backend/
-    │
-    ├── app.js
-    ├── server.js
-    │
-    ├── controllers/
-    │   ├── users.controller.js
-    │   └── expenses.controller.js
-    │
-    ├── models/
-    │   ├── User.js
-    │   ├── UserModel.js
-    │   ├── Expense.js
-    │   └── ExpenseModel.js
-    │
-    ├── middleware/
-    │   └── auth.js
-    │
-    ├── data/
-    │   └── store.js
-
-------------------------------------------------------------------------
-
-##  Autenticazione
-
-Il sistema utilizza autenticazione **stateless basata su JWT**:
-
--   Registrazione utente
--   Hashing password tramite bcrypt
--   Generazione token JWT
--   Middleware di verifica token
--   Protezione delle route sensibili
-
-------------------------------------------------------------------------
-##  Modello Dati
-
-### User
-
--   Credenziali
--   Password hashata
--   Identificatore univoco
-
-### Expense
-
--   Riferimento utente
--   Importo
--   Descrizione
--   Data
-
-Persistenza gestita tramite MongoDB con Mongoose ODM.
-
-------------------------------------------------------------------------
-
-#  Avvio Backend
-
-Creare un file `.env` nella cartella backend:
-
-    PORT=5000
-    MONGO_URI=your_mongodb_connection_string
-    JWT_SECRET=your_secret_key
-
-Avvio:
-
-``` bash
-cd backend
-npm install
+cd backend\
+npm install\
 npm start
-```
 
-Backend disponibile su:
+Variabili d'ambiente richieste:
 
-    http://localhost:5000
+PORT=3001\
+MONGO_URI=...\
+JWT_SECRET=...\
+JWT_EXPIRES_IN=7d
 
-------------------------------------------------------------------------
+## Frontend
 
-# Comunicazione Frontend-Backend
+cd frontend\
+npm install\
+npm run dev
 
-Il frontend comunica con il backend tramite API REST.
+Variabile:
 
-Le route protette richiedono header:
-
-    Authorization: Bearer <token>
-
-------------------------------------------------------------------------
-
-#  Requisiti di Sistema
-
--   Node.js \>= 18
--   npm
--   MongoDB
+VITE_API_URL=http://localhost:3001
 
 ------------------------------------------------------------------------
 
+#  Test Automatici
 
-**Progetto sviluppato per il corso di Applicazioni Web, Mobile e Cloud**
+Il backend utilizza: - Jest - Supertest
+
+Esecuzione:
+
+cd backend\
+npm test
+
+Test implementato: - GET /health
+
+------------------------------------------------------------------------
+
+#  CI/CD -- GitHub Actions
+
+File: .github/workflows/ci.yml
+
+La pipeline esegue automaticamente:
+
+Backend: - Avvio MongoDB come service - Installazione dipendenze -
+Esecuzione test automatici
+
+Frontend: - Installazione dipendenze - Build produzione
+
+Ogni push o pull request attiva automaticamente la pipeline.
+
+------------------------------------------------------------------------
+
+#  Deployment Cloud
+
+## Backend
+
+Deploy su Render come Web Service.
+
+Configurazione: - Root directory: backend - Build command: npm install -
+Start command: npm start - Variabili ambiente: - MONGO_URI (MongoDB
+Atlas) - JWT_SECRET - PORT
+
+## Database
+
+MongoDB Atlas (cluster gratuito)
+
+## Frontend
+
+Deploy su Vercel. - Root directory: frontend - Framework: Vite -
+Environment variable:
+VITE_API_URL=https://applicazioni-web-mobile-e-cloud.onrender.com
+
+------------------------------------------------------------------------
+
+#  Struttura Progetto
+
+backend/\
+controllers/\
+routes/\
+models/\
+app.js\
+server.js
+
+frontend/\
+src/\
+public/
+
+docs/\
+architecture.md\
+deployment.md
+
+------------------------------------------------------------------------
+
+#  Tecnologie Utilizzate
+
+Backend: - Node.js - Express - MongoDB - Mongoose - JWT - Jest -
+Supertest
+
+Frontend: - React - Vite - Axios
+
+DevOps: - Docker - Docker Compose - GitHub Actions - Render - Vercel
+
+
+#  Autori
+
 Francesco Di Marzio, Mariadele Di Biase, Fabiana Felicioni
+Corso di Applicazioni Web, Mobile e Cloud\
+Anno Accademico 2024/2025
