@@ -7,14 +7,18 @@ import usersRoutes from "./routes/users.routes.js";
 import expensesRoutes from "./routes/expenses.routes.js";
 import authRoutes from "./routes/auth.routes.js";
 
-mongoose
+/*mongoose
   .connect(process.env.MONGO_URI)
   .then(() => console.log("✅ Database connesso"))
-  .catch(err => console.error("❌ Errore DB:", err));
+  .catch(err => console.error("❌ Errore DB:", err));*/
 
-  const app = express();
+const app = express();
 app.use(cors());
 app.use(express.json());
+
+app.get("/health", (req, res) => {
+  res.json({ ok: true });
+});
 
 app.use("/auth", authRoutes);
 app.use("/users", usersRoutes);

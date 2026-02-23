@@ -1,0 +1,41 @@
+services:
+  mongo:
+    image: mongo:7
+    container_name: expense-split-mongo
+    restart: unless-stopped
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo_data:/data/db
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: expense-split-backend
+    restart: unless-stopped
+    environment:
+      PORT: "3001"
+      MONGO_URI: "mongodb://mongo:27017/expense_split"
+      JWT_SECRET: "dev_secret_change_me"
+      JWT_EXPIRES_IN: "7d"
+    ports:
+      - "3001:3001"
+    depends_on:
+      - mongo
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: expense-split-frontend
+    restart: unless-stopped
+    environment:
+      VITE_API_URL: "http://localhost:3001"
+    ports:
+      - "5173:5173"
+    depends_on:
+      - backend
+
+volumes:
+  mongo_data:
