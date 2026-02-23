@@ -28,12 +28,12 @@ Il progetto è stato sviluppato come esercitazione per il corso di
 
 #  Architettura
 
-``` mermaid
+ mermaid
 flowchart LR
     User --> Frontend[React + Vite (Vercel)]
     Frontend --> Backend[Node.js + Express (Render)]
     Backend --> MongoDB[(MongoDB Atlas)]
-```
+
 
 ------------------------------------------------------------------------
 
