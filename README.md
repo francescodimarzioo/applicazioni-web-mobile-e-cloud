@@ -22,7 +22,7 @@ Il progetto è stato sviluppato come esercitazione per il corso di
     https://applicazioni-web-mobile-e-cloud.onrender.com
 
 -   🔹 Frontend (Vercel)\
-    https://TUO-FRONTEND.vercel.app
+   https://applicazioni-web-mobile-e-cloud-hpnctl8yh.vercel.app
 
 ------------------------------------------------------------------------
 
