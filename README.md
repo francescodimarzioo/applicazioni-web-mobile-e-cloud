@@ -28,11 +28,8 @@ Il progetto è stato sviluppato come esercitazione per il corso di
 
 #  Architettura
 
- mermaid
-flowchart LR
-    User --> Frontend[React + Vite (Vercel)]
-    Frontend --> Backend[Node.js + Express (Render)]
-    Backend --> MongoDB[(MongoDB Atlas)]
+
+<img width="1130" height="636" alt="Diagramma Architettura" src="https://github.com/user-attachments/assets/fdf7e25b-392d-41c0-b8fd-a0c45c5e2e71" />
 
 
 ------------------------------------------------------------------------
