@@ -64,7 +64,7 @@ ExpenseSplitApp è un’applicazione web che permette di gestire e dividere spes
     https://applicazioni-web-mobile-e-cloud.onrender.com
 
 -   🔹 Frontend (Vercel)\
-   https://applicazioni-web-mobile-e-cloud-hpnctl8yh.vercel.app
+   https://applicazioni-web-mobile-e-cloud.vercel.app
 
 ------------------------------------------------------------------------
 
