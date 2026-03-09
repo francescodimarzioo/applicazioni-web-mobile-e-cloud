@@ -56,7 +56,6 @@ export function addExpense(expense) {
   });
 }
 
-/* ✅ NUOVO: elimina spesa */
 export function deleteExpense(id) {
   return apiFetch(`/expenses/${id}`, {
     method: "DELETE",
